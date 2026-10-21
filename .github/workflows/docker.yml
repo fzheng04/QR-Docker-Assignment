@@ -1,0 +1,47 @@
+
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t qr-code-generator-app .
+
+      - name: Generate GitHub QR code
+        run: |
+          docker volume create qr-ci-output
+          docker run --rm \
+            -v qr-ci-output:/app/qr_codes \
+            qr-code-generator-app \
+            --url https://github.com/fzheng04/QR-Docker-Assignment
+
+      - name: Generate DockerHub QR code
+        run: |
+          docker run --rm \
+            -v qr-ci-output:/app/qr_codes \
+            qr-code-generator-app \
+            --url https://hub.docker.com/r/fzheng04/qr-docker-assignment
+
+      - name: Verify QR code output
+        run: |
+          docker run --rm \
+            -v qr-ci-output:/data \
+            --entrypoint sh \
+            qr-code-generator-app \
+            -c 'test -n "$(find /data -maxdepth 1 -name "*.png" -print -quit)"'
+
+      - name: Verify non-root user
+        run: |
+          test "$(docker image inspect qr-code-generator-app --format '{{.Config.User}}')" = "myuser"
