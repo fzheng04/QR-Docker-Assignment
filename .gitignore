@@ -110,7 +110,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+venv-old/
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -137,3 +137,8 @@ cython_debug/
 
 # JupyterLab
 .jupyterlab-config
+
+qr_codes
+# Except these two QR codes for README
+!qr_codes/github.png
+!qr_codes/dockerhub.png
